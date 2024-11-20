@@ -9,42 +9,42 @@ import (
 )
 
 type Simulator struct {
-	dt      float64
-	t       float64
-	count   int
+	Dt      float64
+	T       float64
+	Count   int
 	N       int
-	pos     []Vector
-	vel     []Vector
-	gravity Vector
+	Pos     []Vector
+	Vel     []Vector
+	Gravity Vector
 }
 
-func NewSimulator(dt float64, pos, vel []Vector, gravity Vector) *Simulator {
+func NewSimulator(Dt float64, Pos, Vel []Vector, Gravity Vector) *Simulator {
 	return &Simulator{
-		dt:      dt,
-		t:       0.0,
-		count:   0,
-		N:       len(pos),
-		pos:     pos,
-		vel:     vel,
-		gravity: gravity,
+		Dt:      Dt,
+		T:       0.0,
+		Count:   0,
+		N:       len(Pos),
+		Pos:     Pos,
+		Vel:     Vel,
+		Gravity: Gravity,
 	}
 }
 
 func (simulator *Simulator) Step() {
-	simulator.count++
-	simulator.t = float64(simulator.count) * simulator.dt
+	simulator.Count++
+	simulator.T = float64(simulator.Count) * simulator.Dt
 
 	x_ := make([]Vector, simulator.N)
 	v_ := make([]Vector, simulator.N)
 	for i := 0; i < simulator.N; i++ {
-		new_vel := simulator.vel[i].Add(simulator.gravity.Mul(simulator.dt))
+		new_vel := simulator.Vel[i].Add(simulator.Gravity.Mul(simulator.Dt))
 		v_[i] = new_vel
-		x_[i] = simulator.pos[i].Add(new_vel.Mul(simulator.dt))
+		x_[i] = simulator.Pos[i].Add(new_vel.Mul(simulator.Dt))
 	}
 
 	for i := 0; i < simulator.N; i++ {
-		simulator.pos[i] = x_[i]
-		simulator.vel[i] = v_[i]
+		simulator.Pos[i] = x_[i]
+		simulator.Vel[i] = v_[i]
 	}
 }
 
@@ -53,7 +53,7 @@ func (simulator *Simulator) Save(directory string) {
 	if _, err := os.Stat(directory); os.IsNotExist(err) {
 		os.Mkdir(directory, os.ModeDir|0755)
 	}
-	filename := directory + fmt.Sprintf("/snapshot_%08d.hdf5", simulator.count)
+	filename := directory + fmt.Sprintf("/snapshot_%010d.hdf5", simulator.Count)
 	// HDF5 파일 생성
 	f, err := hdf5.CreateFile(filename, hdf5.F_ACC_TRUNC)
 	if err != nil {
@@ -65,26 +65,26 @@ func (simulator *Simulator) Save(directory string) {
 	defer rootGroup.Close()
 
 	// Attribute 생성
-	CreateAttributeVector(rootGroup, "gravity", simulator.gravity)
+	CreateAttributeFloat(rootGroup, "Dt", simulator.Dt)
+	CreateAttributeFloat(rootGroup, "T", simulator.T)
+	CreateAttributeInt(rootGroup, "Count", simulator.Count)
 	CreateAttributeInt(rootGroup, "N", simulator.N)
-	CreateAttributeInt(rootGroup, "count", simulator.count)
-	CreateAttributeFloat(rootGroup, "t", simulator.t)
-	CreateAttributeFloat(rootGroup, "dt", simulator.dt)
+	CreateAttributeVector(rootGroup, "Gravity", simulator.Gravity)
 
 	pos := make([]float64, 3*simulator.N)
 	vel := make([]float64, 3*simulator.N)
 
 	for i := 0; i < simulator.N; i++ {
-		pos[3*i] = simulator.pos[i].X
-		pos[3*i+1] = simulator.pos[i].Y
-		pos[3*i+2] = simulator.pos[i].Z
+		pos[3*i] = simulator.Pos[i].X
+		pos[3*i+1] = simulator.Pos[i].Y
+		pos[3*i+2] = simulator.Pos[i].Z
 
-		vel[3*i] = simulator.vel[i].X
-		vel[3*i+1] = simulator.vel[i].Y
-		vel[3*i+2] = simulator.vel[i].Z
+		vel[3*i] = simulator.Vel[i].X
+		vel[3*i+1] = simulator.Vel[i].Y
+		vel[3*i+2] = simulator.Vel[i].Z
 	}
-	CreateDatasetFloat(rootGroup, "pos", pos, []uint{uint(simulator.N), 3})
-	CreateDatasetFloat(rootGroup, "vel", vel, []uint{uint(simulator.N), 3})
+	CreateDatasetFloat(rootGroup, "Pos", pos, []uint{uint(simulator.N), 3})
+	CreateDatasetFloat(rootGroup, "Vel", vel, []uint{uint(simulator.N), 3})
 }
 
 func (simulator *Simulator) Load(filename string) {
@@ -98,23 +98,23 @@ func (simulator *Simulator) Load(filename string) {
 	rootGroup, _ := file.OpenGroup("/")
 	defer rootGroup.Close()
 
-	dt := ReadAttributeFloat(rootGroup, "dt")
-	t := ReadAttributeFloat(rootGroup, "t")
-	count := ReadAttributeInt(rootGroup, "count")
+	dt := ReadAttributeFloat(rootGroup, "Dt")
+	t := ReadAttributeFloat(rootGroup, "T")
+	count := ReadAttributeInt(rootGroup, "Count")
 	N := ReadAttributeInt(rootGroup, "N")
-	gravity := ReadAttributeVector(rootGroup, "gravity")
+	gravity := ReadAttributeVector(rootGroup, "Gravity")
 
-	pos := ReadDatasetVector(rootGroup, "pos")
-	vel := ReadDatasetVector(rootGroup, "vel")
+	pos := ReadDatasetVector(rootGroup, "Pos")
+	vel := ReadDatasetVector(rootGroup, "Vel")
 
-	simulator.dt = dt
-	simulator.t = t
-	simulator.count = count
+	simulator.Dt = dt
+	simulator.T = t
+	simulator.Count = count
 	simulator.N = N
-	simulator.gravity = gravity
+	simulator.Gravity = gravity
 
-	simulator.pos = pos
-	simulator.vel = vel
+	simulator.Pos = pos
+	simulator.Vel = vel
 }
 
 func main() {
