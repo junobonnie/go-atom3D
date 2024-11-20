@@ -6,8 +6,8 @@ import (
 	"github.com/fogleman/gg"
 )
 
-func Rendering(width *int, height *int, depth float64, filename string, directory string) {
-	w, h := float64(*width)*2, float64(*height)*2
+func Rendering(width *float64, height *float64, depth float64, filename string, directory string) {
+	w, h := *width*2, *height*2
 	dc := gg.NewContext(int(w), int(h))
 	dc.SetRGB(1, 1, 1)
 	dc.DrawRectangle(0, 0, w, h)
