@@ -9,26 +9,26 @@ import (
 
 func RenderSO3(angle Vector, omega Vector, t float64) Tensor {
 	var omega_rotaion Tensor
-	if omega == Vector{0, 0, 0} {
+	if omega.X == 0 && omega.Y == 0 && omega.Z == 0 {
 		omega_rotaion = Tensor{
 			1, 0, 0,
 			0, 1, 0,
 			0, 0, 1}
 	} else {
-		omega_rotaion = SO3_x(omega.X*t).DotT(
-						SO3_y(omega.Y*t).DotT(
-						SO3_z(omega.Z*t)))
+		omega_rotaion = SO3_x(omega.X * t).DotT(
+			SO3_y(omega.Y * t).DotT(
+				SO3_z(omega.Z * t)))
 	}
 	var angle_rotaion Tensor
-	if angle == Vector{0, 0, 0} {
+	if angle.X == 0 && angle.Y == 0 && angle.Z == 0 {
 		angle_rotaion = Tensor{
 			1, 0, 0,
 			0, 1, 0,
 			0, 0, 1}
 	} else {
 		angle_rotaion = SO3_x(angle.X).DotT(
-						SO3_y(angle.Y).DotT(
-						SO3_z(angle.Z)))
+			SO3_y(angle.Y).DotT(
+				SO3_z(angle.Z)))
 	}
 	return omega_rotaion.DotT(angle_rotaion)
 }
@@ -44,8 +44,8 @@ func Rendering(width float64, height float64, depth float64, angle Vector, omega
 
 	for i := 0; i < int(N); i++ {
 		render_pos := RenderSO3(angle, omega, float64(count)).DotV(pos[i])
-		ratio := focus_factor*depth/(render_pos.Z + depth)
-		dc.DrawCircle(10.*render_pos[i].X, h-10*render_pos[i].Y, 5*ratio)
+		ratio := focus_factor * depth / (render_pos.Z + depth)
+		dc.DrawCircle(10.*render_pos.X, h-10*render_pos.Y, 5*ratio)
 		dc.SetRGB(0, 0, 1)
 		dc.Fill()
 	}
