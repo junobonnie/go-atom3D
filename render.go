@@ -40,10 +40,10 @@ func Rendering(width float64, height float64, depth float64, angle Vector, omega
 	dc.DrawRectangle(0, 0, w, h)
 	dc.Fill()
 
-	_, _, count, N, _, pos, _ := Read(filename)
+	_, t, count, N, _, pos, _ := Read(filename)
 
 	for i := 0; i < int(N); i++ {
-		render_pos := RenderSO3(angle, omega, float64(count)).DotV(pos[i])
+		render_pos := RenderSO3(angle, omega, t).DotV(pos[i])
 		ratio := focus_factor * depth / (render_pos.Z + depth)
 		dc.DrawCircle(10.*render_pos.X, h-10*render_pos.Y, 5*ratio)
 		dc.SetRGB(0, 0, 1)
