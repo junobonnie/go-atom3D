@@ -87,7 +87,7 @@ func (simulator *Simulator) Save(directory string) {
 	CreateDatasetFloat(rootGroup, "Vel", vel, []uint{uint(simulator.N), 3})
 }
 
-func (simulator *Simulator) Load(filename string) {
+func Read(filename string) (float64, float64, int, int, Vector, []Vector, []Vector) {
 	// HDF5 파일 열기
 	file, err := hdf5.OpenFile(filename, hdf5.F_ACC_RDONLY)
 	if err != nil {
@@ -107,6 +107,13 @@ func (simulator *Simulator) Load(filename string) {
 	pos := ReadDatasetVector(rootGroup, "Pos")
 	vel := ReadDatasetVector(rootGroup, "Vel")
 
+	return dt, t, count, N, gravity, pos, vel
+}
+
+func (simulator *Simulator) Load(filename string) {
+	// HDF5 파일 읽기
+	dt, t, count, N, gravity, pos, vel := Read(filename)
+
 	simulator.Dt = dt
 	simulator.T = t
 	simulator.Count = count
@@ -124,9 +131,9 @@ func main() {
 	//simulator.Load("output/snapshot_00000991.hdf5")
 
 	for i := 0; i < 1000; i++ {
-		simulator.Step()
 		if i%10 == 0 {
 			simulator.Save("output")
 		}
+		simulator.Step()
 	}
 }
