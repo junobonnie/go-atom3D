@@ -7,7 +7,33 @@ import (
 	"github.com/fogleman/gg"
 )
 
-func Rendering(width float64, height float64, depth float64, filename string, directory string) {
+func RenderSO3(angle Vector, omega Vector, t float64) Tensor {
+	var omega_rotaion Tensor
+	if omega == Vector{0, 0, 0} {
+		omega_rotaion = Tensor{
+			1, 0, 0,
+			0, 1, 0,
+			0, 0, 1}
+	} else {
+		omega_rotaion = SO3_x(omega.X*t).DotT(
+						SO3_y(omega.Y*t).DotT(
+						SO3_z(omega.Z*t)))
+	}
+	var angle_rotaion Tensor
+	if angle == Vector{0, 0, 0} {
+		angle_rotaion = Tensor{
+			1, 0, 0,
+			0, 1, 0,
+			0, 0, 1}
+	} else {
+		angle_rotaion = SO3_x(angle.X).DotT(
+						SO3_y(angle.Y).DotT(
+						SO3_z(angle.Z)))
+	}
+	return omega_rotaion.DotT(angle_rotaion)
+}
+
+func Rendering(width float64, height float64, depth float64, angle Vector, omega Vector, focus_factor float64, filename string, directory string) {
 	w, h := 10.*width, 10.*height
 	dc := gg.NewContext(int(w), int(h))
 	dc.SetRGB(1, 1, 1)
@@ -17,7 +43,9 @@ func Rendering(width float64, height float64, depth float64, filename string, di
 	_, _, count, N, _, pos, _ := Read(filename)
 
 	for i := 0; i < int(N); i++ {
-		dc.DrawCircle(10.*pos[i].X, h-10*pos[i].Y, 5)
+		render_pos := RenderSO3(angle, omega, float64(count)).DotV(pos[i])
+		ratio := focus_factor*depth/(render_pos.Z + depth)
+		dc.DrawCircle(10.*render_pos[i].X, h-10*render_pos[i].Y, 5*ratio)
 		dc.SetRGB(0, 0, 1)
 		dc.Fill()
 	}
