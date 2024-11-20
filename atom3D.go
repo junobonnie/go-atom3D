@@ -49,7 +49,6 @@ func (simulator *Simulator) Step() {
 }
 
 func (simulator *Simulator) Save(directory string) {
-
 	if _, err := os.Stat(directory); os.IsNotExist(err) {
 		os.Mkdir(directory, os.ModeDir|0755)
 	}
