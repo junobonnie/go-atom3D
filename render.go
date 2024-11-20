@@ -6,8 +6,8 @@ import (
 	"github.com/fogleman/gg"
 )
 
-func Rendering(width *float64, height *float64, depth float64, filename string, directory string) {
-	w, h := *width*2, *height*2
+func Rendering(width float64, height float64, depth float64, filename string, directory string) {
+	w, h := width, height
 	dc := gg.NewContext(int(w), int(h))
 	dc.SetRGB(1, 1, 1)
 	dc.DrawRectangle(0, 0, w, h)
@@ -16,8 +16,8 @@ func Rendering(width *float64, height *float64, depth float64, filename string, 
 	_, t, count, N, _, pos, _ := Read(filename)
 
 	for i := 0; i < int(N); i++ {
-		dc.DrawCircle(pos[i].X*2, h-pos[i].Y*2, 5)
-		dc.SetRGB(0, 0, 255)
+		dc.DrawCircle(pos[i].X, h/2-pos[i].Y, 5)
+		dc.SetRGB(0, 0, 1)
 		dc.Fill()
 	}
 	/*
