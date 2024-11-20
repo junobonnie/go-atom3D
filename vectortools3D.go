@@ -1,4 +1,4 @@
-package main
+package atom3D
 
 import (
 	"math"

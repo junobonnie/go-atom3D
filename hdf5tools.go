@@ -1,10 +1,10 @@
-package main
+package atom3D
 
 import (
 	"fmt"
+
 	"gonum.org/v1/hdf5"
 )
-
 
 func CreateAttributeFloat(group *hdf5.Group, name string, value float64) {
 	space, _ := hdf5.CreateSimpleDataspace([]uint{1}, nil)
