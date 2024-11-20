@@ -1,4 +1,4 @@
-module github.com/junobonnie/go-atom3D/atom3D
+module github.com/junobonnie/go-atom3D
 
 go 1.18
 
