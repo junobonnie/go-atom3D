@@ -18,7 +18,7 @@ func Rendering(width float64, height float64, depth float64, filename string, di
 
 	for i := 0; i < int(N); i++ {
 		dc.DrawCircle(10.*pos[i].X, 10.*(h-pos[i].Y), 5)
-		dc.SetRGB(0, 0, 1)
+		dc.SetRGB(0, 0, 255)
 		dc.Fill()
 	}
 	/*
