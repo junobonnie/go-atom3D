@@ -45,7 +45,7 @@ func Rendering(width float64, height float64, depth float64, angle Vector, omega
 	for i := 0; i < int(N); i++ {
 		render_pos := RenderSO3(angle, omega, t).DotV(pos[i])
 		ratio := focus_factor * depth / (render_pos.Z + depth)
-		dc.DrawCircle(10.*render_pos.X, h-10*render_pos.Y, 5*ratio)
+		dc.DrawCircle(w/2+10.*render_pos.X, h/2-10*render_pos.Y, 5*ratio)
 		dc.SetRGB(0, 0, 1)
 		dc.Fill()
 	}
