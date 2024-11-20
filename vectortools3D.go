@@ -5,56 +5,56 @@ import (
 )
 
 type Tensor struct {
-	xx, xy, xz float64
-	yx, yy, yz float64
-	zx, zy, zz float64
+	XX, XY, XZ float64
+	YX, YY, YZ float64
+	ZX, ZY, ZZ float64
 }
 
 func (t Tensor) Abs() float64 {
-	return t.xx*t.yy*t.zz + t.xy*t.yz*t.zx + t.xz*t.yx*t.zy -
-		t.xx*t.yz*t.zy - t.xy*t.yx*t.zz - t.xz*t.yy*t.zx
+	return t.XX*t.YY*t.ZZ + t.XY*t.YZ*t.ZX + t.XZ*t.YX*t.ZY -
+		t.XX*t.YZ*t.ZY - t.XY*t.YX*t.ZZ - t.XZ*t.YY*t.ZX
 }
 
 func (t Tensor) Add(other Tensor) Tensor {
 	return Tensor{
-		t.xx + other.xx, t.xy + other.xy, t.xz + other.xz,
-		t.yx + other.yx, t.yy + other.yy, t.yz + other.yz,
-		t.zx + other.zx, t.zy + other.zy, t.zz + other.zz}
+		t.XX + other.XX, t.XY + other.XY, t.XZ + other.XZ,
+		t.YX + other.YX, t.YY + other.YY, t.YZ + other.YZ,
+		t.ZX + other.ZX, t.ZY + other.ZY, t.ZZ + other.ZZ}
 }
 
 func (t Tensor) Sub(other Tensor) Tensor {
 	return Tensor{
-		t.xx - other.xx, t.xy - other.xy, t.xz - other.xz,
-		t.yx - other.yx, t.yy - other.yy, t.yz - other.yz,
-		t.zx - other.zx, t.zy - other.zy, t.zz - other.zz}
+		t.XX - other.XX, t.XY - other.XY, t.XZ - other.XZ,
+		t.YX - other.YX, t.YY - other.YY, t.YZ - other.YZ,
+		t.ZX - other.ZX, t.ZY - other.ZY, t.ZZ - other.ZZ}
 }
 
 func (t Tensor) Mul(num float64) Tensor {
 	return Tensor{
-		t.xx * num, t.xy * num, t.xz * num,
-		t.yx * num, t.yy * num, t.yz * num,
-		t.zx * num, t.zy * num, t.zz * num}
+		t.XX * num, t.XY * num, t.XZ * num,
+		t.YX * num, t.YY * num, t.YZ * num,
+		t.ZX * num, t.ZY * num, t.ZZ * num}
 }
 
 func (t Tensor) Div(num float64) Tensor {
 	return Tensor{
-		t.xx / num, t.xy / num, t.xz / num,
-		t.yx / num, t.yy / num, t.yz / num,
-		t.zx / num, t.zy / num, t.zz / num}
+		t.XX / num, t.XY / num, t.XZ / num,
+		t.YX / num, t.YY / num, t.YZ / num,
+		t.ZX / num, t.ZY / num, t.ZZ / num}
 }
 
 func (t Tensor) DotT(other Tensor) Tensor {
 	return Tensor{
-		t.xx*other.xx + t.xy*other.yx + t.xz*other.zx, t.xx*other.xy + t.xy*other.yy + t.xz*other.zy, t.xx*other.xz + t.xy*other.yz + t.xz*other.zz,
-		t.yx*other.xx + t.yy*other.yx + t.yz*other.zx, t.yx*other.xy + t.yy*other.yy + t.yz*other.zy, t.yx*other.xz + t.yy*other.yz + t.yz*other.zz,
-		t.zx*other.xx + t.zy*other.yx + t.zz*other.zx, t.zx*other.xy + t.zy*other.yy + t.zz*other.zy, t.zx*other.xz + t.zy*other.yz + t.zz*other.zz}
+		t.XX*other.XX + t.XY*other.YX + t.XZ*other.ZX, t.XX*other.XY + t.XY*other.YY + t.XZ*other.ZY, t.XX*other.XZ + t.XY*other.YZ + t.XZ*other.ZZ,
+		t.YX*other.XX + t.YY*other.YX + t.YZ*other.ZX, t.YX*other.XY + t.YY*other.YY + t.YZ*other.ZY, t.YX*other.XZ + t.YY*other.YZ + t.YZ*other.ZZ,
+		t.ZX*other.XX + t.ZY*other.YX + t.ZZ*other.ZX, t.ZX*other.XY + t.ZY*other.YY + t.ZZ*other.ZY, t.ZX*other.XZ + t.ZY*other.YZ + t.ZZ*other.ZZ}
 }
 
 func (t Tensor) DotV(v Vector) Vector {
 	return Vector{
-		t.xx*v.x + t.xy*v.y + t.xz*v.z,
-		t.yx*v.x + t.yy*v.y + t.yz*v.z,
-		t.zx*v.x + t.zy*v.y + t.zz*v.z}
+		t.XX*v.X + t.XY*v.Y + t.XZ*v.Z,
+		t.YX*v.X + t.YY*v.Y + t.YZ*v.Z,
+		t.ZX*v.X + t.ZY*v.Y + t.ZZ*v.Z}
 }
 
 func (t Tensor) Inv() Tensor {
@@ -63,9 +63,9 @@ func (t Tensor) Inv() Tensor {
 		panic("Determinant is zero")
 	}
 	return Tensor{
-		(t.yy*t.zz - t.yz*t.zy) / det, (t.xz*t.zy - t.xy*t.zz) / det, (t.xy*t.yz - t.xz*t.yy) / det,
-		(t.yz*t.zx - t.yx*t.zz) / det, (t.xx*t.zz - t.xz*t.zx) / det, (t.xz*t.yx - t.xx*t.yz) / det,
-		(t.yx*t.zy - t.yy*t.zx) / det, (t.xy*t.zx - t.xx*t.zy) / det, (t.xx*t.yy - t.xy*t.yx) / det}
+		(t.YY*t.ZZ - t.YZ*t.ZY) / det, (t.XZ*t.ZY - t.XY*t.ZZ) / det, (t.XY*t.YZ - t.XZ*t.YY) / det,
+		(t.YZ*t.ZX - t.YX*t.ZZ) / det, (t.XX*t.ZZ - t.XZ*t.ZX) / det, (t.XZ*t.YX - t.XX*t.YZ) / det,
+		(t.YX*t.ZY - t.YY*t.ZX) / det, (t.XY*t.ZX - t.XX*t.ZY) / det, (t.XX*t.YY - t.XY*t.YX) / det}
 }
 
 func (t Tensor) Pow(num int) Tensor {
@@ -90,9 +90,9 @@ func (t Tensor) Pow(num int) Tensor {
 
 func (t Tensor) T() Tensor {
 	return Tensor{
-		t.xx, t.yx, t.zx,
-		t.xy, t.yy, t.zy,
-		t.xz, t.yz, t.zz}
+		t.XX, t.YX, t.ZX,
+		t.XY, t.YY, t.ZY,
+		t.XZ, t.YZ, t.ZZ}
 }
 
 func SO3_z(angle float64) Tensor {
@@ -117,38 +117,38 @@ func SO3_x(angle float64) Tensor {
 }
 
 type Vector struct {
-	x, y, z float64
+	X, Y, Z float64
 }
 
 func (v Vector) Abs() float64 {
-	return math.Sqrt(v.x*v.x + v.y*v.y + v.z*v.z)
+	return math.Sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z)
 }
 
 func (v Vector) Add(other Vector) Vector {
-	return Vector{v.x + other.x, v.y + other.y, v.z + other.z}
+	return Vector{v.X + other.X, v.Y + other.Y, v.Z + other.Z}
 }
 
 func (v Vector) Sub(other Vector) Vector {
-	return Vector{v.x - other.x, v.y - other.y, v.z - other.z}
+	return Vector{v.X - other.X, v.Y - other.Y, v.Z - other.Z}
 }
 
 func (v Vector) Mul(num float64) Vector {
-	return Vector{v.x * num, v.y * num, v.z * num}
+	return Vector{v.X * num, v.Y * num, v.Z * num}
 }
 
 func (v Vector) Div(num float64) Vector {
-	return Vector{v.x / num, v.y / num, v.z / num}
+	return Vector{v.X / num, v.Y / num, v.Z / num}
 }
 
 func (v Vector) Dot(other Vector) float64 {
-	return v.x*other.x + v.y*other.y + v.z*other.z
+	return v.X*other.X + v.Y*other.Y + v.Z*other.Z
 }
 
 func (v Vector) Cross(other Vector) Vector {
 	return Vector{
-		v.y*other.z - v.z*other.y,
-		v.z*other.x - v.x*other.z,
-		v.x*other.y - v.y*other.x}
+		v.Y*other.Z - v.Z*other.Y,
+		v.Z*other.X - v.X*other.Z,
+		v.X*other.Y - v.Y*other.X}
 }
 
 /*

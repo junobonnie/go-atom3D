@@ -75,13 +75,13 @@ func (simulator *Simulator) Save(directory string) {
 	vel := make([]float64, 3*simulator.N)
 
 	for i := 0; i < simulator.N; i++ {
-		pos[3*i] = simulator.pos[i].x
-		pos[3*i+1] = simulator.pos[i].y
-		pos[3*i+2] = simulator.pos[i].z
+		pos[3*i] = simulator.pos[i].X
+		pos[3*i+1] = simulator.pos[i].Y
+		pos[3*i+2] = simulator.pos[i].Z
 
-		vel[3*i] = simulator.vel[i].x
-		vel[3*i+1] = simulator.vel[i].y
-		vel[3*i+2] = simulator.vel[i].z
+		vel[3*i] = simulator.vel[i].X
+		vel[3*i+1] = simulator.vel[i].Y
+		vel[3*i+2] = simulator.vel[i].Z
 	}
 	CreateDatasetFloat(rootGroup, "pos", pos, []uint{uint(simulator.N), 3})
 	CreateDatasetFloat(rootGroup, "vel", vel, []uint{uint(simulator.N), 3})
