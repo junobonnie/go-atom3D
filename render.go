@@ -59,9 +59,9 @@ func (render Render) DrawText(dc *gg.Context, pos Vector, font_size float64, tex
 	dc.DrawString(text, 5*render.Width+10.*render_pos.X, 5*render.Height-10.*render_pos.Y)
 }
 
-func (render Render) Save(dc *gg.Context, filename string, directory string, count int) {
+func (render Render) Save(dc *gg.Context, directory string, count int) {
 	if _, err := os.Stat(directory); os.IsNotExist(err) {
 		os.Mkdir(directory, os.ModeDir|0755)
 	}
-	dc.SavePNG(fmt.Sprintf("%s/%s_%010d.png", directory, filename, count))
+	dc.SavePNG(fmt.Sprintf("%s/render_%010d.png", directory, count))
 }
