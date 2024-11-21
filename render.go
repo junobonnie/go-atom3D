@@ -79,6 +79,25 @@ func (render Render) DrawPlaneText(dc *gg.Context, x float64, y float64, text st
 	dc.DrawString(text, 5*render.Width+10.*x, 5*render.Height-10.*y)
 }
 
+func (render Render) DrawLine(dc *gg.Context, pos1 Vector, pos2 Vector, width float64, color []float64) {
+	render_pos1 := RenderSO3(render.Angle).DotV(pos1)
+	render_pos2 := RenderSO3(render.Angle).DotV(pos2)
+	ratio1 := render.FocusFactor * render.Depth / (pos1.Y + render.Depth)
+	ratio2 := render.FocusFactor * render.Depth / (pos2.Y + render.Depth)
+	dc.SetRGB(color[0], color[1], color[2])
+	dc.DrawLine(5*render.Width+10.*render_pos1.X, 5*render.Height-10.*render_pos1.Z, 5*render.Width+10.*render_pos2.X, 5*render.Height-10.*render_pos2.Z)
+	dc.SetLineWidth(width)
+	dc.Stroke()
+}
+
+func (render Render) DrawAxis(dc *gg.Context, length float64, width float64, font_size float64, font string) {
+	render.DrawLine(dc, Vector{0, 0, 0}, Vector{length, 0, 0}, width, []float64{1, 0, 0})
+	render.DrawLine(dc, Vector{0, 0, 0}, Vector{0, length, 0}, width, []float64{0, 1, 0})
+	render.DrawLine(dc, Vector{0, 0, 0}, Vector{0, 0, length}, width, []float64{0, 0, 1})
+	render.DrawText(dc, Vector{length, 0, 0}, "X", font_size, font, []float64{1, 0, 0})
+	render.DrawText(dc, Vector{0, length, 0}, "Y", font_size, font, []float64{0, 1, 0})
+	render.DrawText(dc, Vector{0, 0, length}, "Z", font_size, font, []float64{0, 0, 1})
+}
 
 func (render Render) Save(dc *gg.Context, directory string, count int) {
 	if _, err := os.Stat(directory); os.IsNotExist(err) {
