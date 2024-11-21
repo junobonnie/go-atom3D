@@ -70,7 +70,7 @@ func (render Render) DrawText(dc *gg.Context, pos Vector, text string, font_size
 	dc.DrawString(text, 5*render.Width+10.*render_pos.X, 5*render.Height-10.*render_pos.Z)
 }
 
-func (render Render) DrawPlanText(dc *gg.Context, x float64, y float64, text string, font_size float64, font string, color []float64) {
+func (render Render) DrawPlaneText(dc *gg.Context, x float64, y float64, text string, font_size float64, font string, color []float64) {
 	dc.SetRGB(color[0], color[1], color[2])
 	fontPath, _ := findfont.Find(font)
 	if err := dc.LoadFontFace(fontPath, 10*font_size); err != nil {
