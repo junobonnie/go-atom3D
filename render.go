@@ -82,8 +82,6 @@ func (render Render) DrawPlaneText(dc *gg.Context, x float64, y float64, text st
 func (render Render) DrawLine(dc *gg.Context, pos1 Vector, pos2 Vector, width float64, color []float64) {
 	render_pos1 := RenderSO3(render.Angle).DotV(pos1)
 	render_pos2 := RenderSO3(render.Angle).DotV(pos2)
-	ratio1 := render.FocusFactor * render.Depth / (pos1.Y + render.Depth)
-	ratio2 := render.FocusFactor * render.Depth / (pos2.Y + render.Depth)
 	dc.SetRGB(color[0], color[1], color[2])
 	dc.DrawLine(5*render.Width+10.*render_pos1.X, 5*render.Height-10.*render_pos1.Z, 5*render.Width+10.*render_pos2.X, 5*render.Height-10.*render_pos2.Z)
 	dc.SetLineWidth(width)
