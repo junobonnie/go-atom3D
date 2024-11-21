@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	findfont "github.com/flopp/go-findfont"
 	"github.com/fogleman/gg"
 )
 
@@ -49,11 +50,12 @@ func (render Render) DrawAtom(dc *gg.Context, pos Vector, radius float64) {
 	dc.Fill()
 }
 
-func (render Render) DrawText(dc *gg.Context, pos Vector, font_size float64, text string) {
+func (render Render) DrawText(dc *gg.Context, pos Vector, text string, font_size float64, font string) {
 	render_pos := RenderSO3(render.Angle).DotV(pos)
 	ratio := render.FocusFactor * render.Depth / (pos.Z + render.Depth)
 	dc.SetRGB(1, 0, 0)
-	if err := dc.LoadFontFace("D2CodingNerd.ttf", ratio*font_size); err != nil {
+	fontPath, _ := findfont.Find(font)
+	if err := dc.LoadFontFace(fontPath, ratio*font_size); err != nil {
 		panic(err)
 	}
 	dc.DrawString(text, 5*render.Width+10.*render_pos.X, 5*render.Height-10.*render_pos.Y)
