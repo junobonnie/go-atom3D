@@ -31,34 +31,43 @@ type Render struct {
 	FocusFactor float64
 }
 
+func NewRender(width, height, depth float64) Render {
+	return &Render{
+		Width:       width,
+		Height:      height,
+		Depth:       depth,
+		Angle:       Vector{0, 0, 0},
+		FocusFactor: 1.}
+}
+
 func (render Render) Figure() *gg.Context {
 	w, h := 10.*render.Width, 10.*render.Height
 	return gg.NewContext(int(w), int(h))
 }
 
-func (render Render) Background(dc *gg.Context) {
-	dc.SetRGB(1, 1, 1)
+func (render Render) Background(dc *gg.Context, color []float64) {
+	dc.SetRGB(color[0], color[1], color[2])
 	dc.DrawRectangle(0, 0, 10.*render.Width, 10.*render.Height)
 	dc.Fill()
 }
 
-func (render Render) DrawAtom(dc *gg.Context, pos Vector, radius float64) {
+func (render Render) DrawAtom(dc *gg.Context, pos Vector, radius float64, color []float64) {
 	render_pos := RenderSO3(render.Angle).DotV(pos)
-	ratio := render.FocusFactor * render.Depth / (render_pos.Z + render.Depth)
-	dc.SetRGB(0, 0, 1)
-	dc.DrawCircle(5*render.Width+10.*render_pos.X, 5*render.Height-10.*render_pos.Y, 5*ratio*radius)
+	ratio := render.FocusFactor * render.Depth / (render_pos.Y + render.Depth)
+	dc.SetRGB(color[0], color[1], color[2])
+	dc.DrawCircle(5*render.Width+10.*render_pos.X, 5*render.Height-10.*render_pos.Z, 5*ratio*radius)
 	dc.Fill()
 }
 
-func (render Render) DrawText(dc *gg.Context, pos Vector, text string, font_size float64, font string) {
+func (render Render) DrawText(dc *gg.Context, pos Vector, text string, font_size float64, font string, color []float64) {
 	render_pos := RenderSO3(render.Angle).DotV(pos)
-	ratio := render.FocusFactor * render.Depth / (pos.Z + render.Depth)
-	dc.SetRGB(1, 0, 0)
+	ratio := render.FocusFactor * render.Depth / (pos.Y + render.Depth)
+	dc.SetRGB(color[0], color[1], color[2])
 	fontPath, _ := findfont.Find(font)
 	if err := dc.LoadFontFace(fontPath, ratio*font_size); err != nil {
 		panic(err)
 	}
-	dc.DrawString(text, 5*render.Width+10.*render_pos.X, 5*render.Height-10.*render_pos.Y)
+	dc.DrawString(text, 5*render.Width+10.*render_pos.X, 5*render.Height-10.*render_pos.Z)
 }
 
 func (render Render) Save(dc *gg.Context, directory string, count int) {
