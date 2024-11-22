@@ -45,24 +45,24 @@ func (render Render) Figure() *gg.Context {
 	return gg.NewContext(int(w), int(h))
 }
 
-func (render Render) Background(dc *gg.Context, color []float64) {
-	dc.SetRGB(color[0], color[1], color[2])
+func (render Render) Background(dc *gg.Context, rgba []float64) {
+	dc.SetRGBA(rgba[0], rgba[1], rgba[2], rgba[3])
 	dc.DrawRectangle(0, 0, 10.*render.Width, 10.*render.Height)
 	dc.Fill()
 }
 
-func (render Render) DrawAtom(dc *gg.Context, pos Vector, radius float64, color []float64) {
+func (render Render) DrawAtom(dc *gg.Context, pos Vector, radius float64, rgba []float64) {
 	render_pos := RenderSO3(render.Angle).DotV(pos)
 	ratio := render.FocusFactor * render.Depth / (render_pos.Y + render.Depth)
-	dc.SetRGB(color[0], color[1], color[2])
+	dc.SetRGBA(rgba[0], rgba[1], rgba[2], rgba[3])
 	dc.DrawCircle(5*render.Width+10.*render_pos.X, 5*render.Height-10.*render_pos.Z, 5*ratio*radius)
 	dc.Fill()
 }
 
-func (render Render) DrawText(dc *gg.Context, pos Vector, text string, font_size float64, font string, color []float64) {
+func (render Render) DrawText(dc *gg.Context, pos Vector, text string, font_size float64, font string, rgba []float64) {
 	render_pos := RenderSO3(render.Angle).DotV(pos)
 	ratio := render.FocusFactor * render.Depth / (pos.Y + render.Depth)
-	dc.SetRGB(color[0], color[1], color[2])
+	dc.SetRGBA(rgba[0], rgba[1], rgba[2], rgba[3])
 	fontPath, _ := findfont.Find(font)
 	if err := dc.LoadFontFace(fontPath, 10*ratio*font_size); err != nil {
 		panic(err)
@@ -70,8 +70,8 @@ func (render Render) DrawText(dc *gg.Context, pos Vector, text string, font_size
 	dc.DrawString(text, 5*render.Width+10.*render_pos.X, 5*render.Height-10.*render_pos.Z)
 }
 
-func (render Render) DrawPlaneText(dc *gg.Context, x float64, y float64, text string, font_size float64, font string, color []float64) {
-	dc.SetRGB(color[0], color[1], color[2])
+func (render Render) DrawPlaneText(dc *gg.Context, x float64, y float64, text string, font_size float64, font string, rgba []float64) {
+	dc.SetRGBA(rgba[0], rgba[1], rgba[2], rgba[3])
 	fontPath, _ := findfont.Find(font)
 	if err := dc.LoadFontFace(fontPath, 10*font_size); err != nil {
 		panic(err)
@@ -79,22 +79,42 @@ func (render Render) DrawPlaneText(dc *gg.Context, x float64, y float64, text st
 	dc.DrawString(text, 5*render.Width+10.*x, 5*render.Height-10.*y)
 }
 
-func (render Render) DrawLine(dc *gg.Context, pos1 Vector, pos2 Vector, width float64, color []float64) {
+func (render Render) DrawLine(dc *gg.Context, pos1 Vector, pos2 Vector, width float64, rgba []float64) {
 	render_pos1 := RenderSO3(render.Angle).DotV(pos1)
 	render_pos2 := RenderSO3(render.Angle).DotV(pos2)
-	dc.SetRGB(color[0], color[1], color[2])
+	dc.SetRGBA(rgba[0], rgba[1], rgba[2], rgba[3])
 	dc.DrawLine(5*render.Width+10.*render_pos1.X, 5*render.Height-10.*render_pos1.Z, 5*render.Width+10.*render_pos2.X, 5*render.Height-10.*render_pos2.Z)
 	dc.SetLineWidth(width)
 	dc.Stroke()
 }
 
 func (render Render) DrawAxis(dc *gg.Context, length float64, width float64, font_size float64, font string) {
-	render.DrawLine(dc, Vector{0, 0, 0}, Vector{length, 0, 0}, width, []float64{1, 0, 0})
-	render.DrawLine(dc, Vector{0, 0, 0}, Vector{0, length, 0}, width, []float64{0, 1, 0})
-	render.DrawLine(dc, Vector{0, 0, 0}, Vector{0, 0, length}, width, []float64{0, 0, 1})
-	render.DrawText(dc, Vector{length, 0, 0}, "X", font_size, font, []float64{1, 0, 0})
-	render.DrawText(dc, Vector{0, length, 0}, "Y", font_size, font, []float64{0, 1, 0})
-	render.DrawText(dc, Vector{0, 0, length}, "Z", font_size, font, []float64{0, 0, 1})
+	e := []Vector{Vector{length, 0, 0}, Vector{0, length, 0}, Vector{0, 0, length}}
+	rgb := [][]float64{{1, 0, 0, 1}, {0, 1, 0, 1}, {0, 0, 1, 1}}
+	text := []string{"X", "Y", "Z"}
+	
+	indices := render.GetSortedIndices(e)
+
+	for _, i := range indices {
+		render.DrawLine(dc, Vector{0, 0, 0}, e[i], width, rgb[i])
+		render.DrawText(dc, e[i], text[i], font_size, font, rgb[i])
+	}
+}
+
+func (render Render) GetSortedIndices(pos []Vector) []int {
+	indices := make([]int, len(pos))
+    for i := range indices {
+        indices[i] = i
+    }
+    
+	veiw_pos := RenderSO3(render.Angle).DotV(Vector{0, 1, 0})
+
+    // 인덱스를 데이터 값에 따라 정렬
+    sort.Slice(indices, func(i, j int) bool {
+        return veiw_pos.Dot(pos[indices[i]]) > veiw_pos.Dot(pos[indices[j]])
+    })
+
+	return indices
 }
 
 func (render Render) Save(dc *gg.Context, directory string, count int) {

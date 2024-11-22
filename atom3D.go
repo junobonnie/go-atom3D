@@ -13,17 +13,19 @@ type Simulator struct {
 	T       float64
 	Count   int
 	N       int
+	Id      []int
 	Pos     []Vector
 	Vel     []Vector
 	Gravity Vector
 }
 
-func NewSimulator(Dt float64, Pos, Vel []Vector, Gravity Vector) *Simulator {
+func NewSimulator(Dt float64, Id []int, Pos, Vel []Vector, Gravity Vector) *Simulator {
 	return &Simulator{
 		Dt:      Dt,
 		T:       0.0,
 		Count:   0,
 		N:       len(Pos),
+		Id:      Id,
 		Pos:     Pos,
 		Vel:     Vel,
 		Gravity: Gravity,
@@ -70,6 +72,9 @@ func (simulator *Simulator) Save(directory string) {
 	CreateAttributeInt(rootGroup, "N", simulator.N)
 	CreateAttributeVector(rootGroup, "Gravity", simulator.Gravity)
 
+	// Dataset 생성
+	CreateDatasetInt(rootGroup, "Id", simulator.Id, []uint{uint(simulator.N)})
+
 	pos := make([]float64, 3*simulator.N)
 	vel := make([]float64, 3*simulator.N)
 
@@ -103,15 +108,17 @@ func Read(filename string) (float64, float64, int, int, Vector, []Vector, []Vect
 	N := ReadAttributeInt(rootGroup, "N")
 	gravity := ReadAttributeVector(rootGroup, "Gravity")
 
+	id := ReadDatasetInt(rootGroup, "Id")
+
 	pos := ReadDatasetVector(rootGroup, "Pos")
 	vel := ReadDatasetVector(rootGroup, "Vel")
 
-	return dt, t, count, N, gravity, pos, vel
+	return dt, t, count, N, gravity, id, pos, vel
 }
 
 func (simulator *Simulator) Load(filename string) {
 	// HDF5 파일 읽기
-	dt, t, count, N, gravity, pos, vel := Read(filename)
+	dt, t, count, N, gravity, id, pos, vel := Read(filename)
 
 	simulator.Dt = dt
 	simulator.T = t
@@ -119,14 +126,17 @@ func (simulator *Simulator) Load(filename string) {
 	simulator.N = N
 	simulator.Gravity = gravity
 
+	simulator.Id = id	
 	simulator.Pos = pos
 	simulator.Vel = vel
 }
 
 func main() {
+	// Create a new simulator
+	id := []int{0, 1}
 	pos := []Vector{Vector{0.0, 0.0, 0.0}, Vector{0.0, 0.0, 1.0}}
 	vel := []Vector{Vector{0.0, 0.0, 0.0}, Vector{0.0, 0.0, 0.0}}
-	simulator := NewSimulator(0.01, pos, vel, Vector{0.0, 0.0, -9.8})
+	simulator := NewSimulator(0.01, id, pos, vel, Vector{0.0, 0.0, -9.8})
 	//simulator.Load("output/snapshot_00000991.hdf5")
 
 	for i := 0; i < 1000; i++ {
