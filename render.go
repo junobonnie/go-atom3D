@@ -108,7 +108,7 @@ func (render Render) GetSortedIndices(pos []Vector) []int {
         indices[i] = i
     }
     
-	veiw_pos := RenderSO3(render.Angle).DotV(Vector{0, 1, 0})
+	veiw_pos := RenderSO3(-1*render.Angle).DotV(Vector{0, 1, 0})
 
     // 인덱스를 데이터 값에 따라 정렬
     sort.Slice(indices, func(i, j int) bool {
