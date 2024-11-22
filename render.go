@@ -3,6 +3,7 @@ package atom3D
 import (
 	"fmt"
 	"os"
+	"sort"
 
 	findfont "github.com/flopp/go-findfont"
 	"github.com/fogleman/gg"
@@ -92,7 +93,7 @@ func (render Render) DrawAxis(dc *gg.Context, length float64, width float64, fon
 	e := []Vector{Vector{length, 0, 0}, Vector{0, length, 0}, Vector{0, 0, length}}
 	rgb := [][]float64{{1, 0, 0, 1}, {0, 1, 0, 1}, {0, 0, 1, 1}}
 	text := []string{"X", "Y", "Z"}
-	
+
 	indices := render.GetSortedIndices(e)
 
 	for _, i := range indices {

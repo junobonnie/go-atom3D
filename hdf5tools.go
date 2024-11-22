@@ -65,6 +65,26 @@ func ReadAttributeVector(group *hdf5.Group, name string) Vector {
 	return value
 }
 
+func ReadDatasetFloat(group *hdf5.Group, name string) []float64 {
+	dataset, _ := group.OpenDataset(name)
+	defer dataset.Close()
+	dataspace := dataset.Space()
+	dims, _, _ := dataspace.SimpleExtentDims()
+	data := make([]float64, dims[0])
+	dataset.Read(&data)
+	return data
+}
+
+func ReadDatasetInt(group *hdf5.Group, name string) []int {
+	dataset, _ := group.OpenDataset(name)
+	defer dataset.Close()
+	dataspace := dataset.Space()
+	dims, _, _ := dataspace.SimpleExtentDims()
+	data := make([]int, dims[0])
+	dataset.Read(&data)
+	return data
+}
+
 func ReadDatasetVector(group *hdf5.Group, name string) []Vector {
 	dataset, _ := group.OpenDataset(name)
 	defer dataset.Close()

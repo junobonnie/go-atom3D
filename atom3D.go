@@ -91,7 +91,7 @@ func (simulator *Simulator) Save(directory string) {
 	CreateDatasetFloat(rootGroup, "Vel", vel, []uint{uint(simulator.N), 3})
 }
 
-func Read(filename string) (float64, float64, int, int, Vector, []Vector, []Vector) {
+func Read(filename string) (float64, float64, int, int, Vector, []int, []Vector, []Vector) {
 	// HDF5 파일 열기
 	file, err := hdf5.OpenFile(filename, hdf5.F_ACC_RDONLY)
 	if err != nil {
