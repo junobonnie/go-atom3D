@@ -3,32 +3,39 @@ package atom3D
 import (
 	"fmt"
 	"log"
+	"math"
 	"os"
 
 	"gonum.org/v1/hdf5"
 )
 
 type Simulator struct {
-	Dt      float64
-	T       float64
-	Count   int
-	N       int
-	Id      []int
-	Pos     []Vector
-	Vel     []Vector
-	Gravity Vector
+	Dt         float64
+	T          float64
+	Count      int
+	N          int
+	Id         []int
+	Pos        []Vector
+	Vel        []Vector
+	Gravity    Vector
+	RegionSize float64
+	GridSize   float64
+	Grid       [][]int
 }
 
 func NewSimulator(Dt float64, Id []int, Pos, Vel []Vector, Gravity Vector) *Simulator {
 	return &Simulator{
-		Dt:      Dt,
-		T:       0.0,
-		Count:   0,
-		N:       len(Pos),
-		Id:      Id,
-		Pos:     Pos,
-		Vel:     Vel,
-		Gravity: Gravity,
+		Dt:         Dt,
+		T:          0.0,
+		Count:      0,
+		N:          len(Pos),
+		Id:         Id,
+		Pos:        Pos,
+		Vel:        Vel,
+		Gravity:    Gravity,
+		RegionSize: 0.0,
+		GridSize:   0.0,
+		Grid:       [][]int{},
 	}
 }
 
@@ -48,6 +55,164 @@ func (simulator *Simulator) Step() {
 		simulator.Pos[i] = x_[i]
 		simulator.Vel[i] = v_[i]
 	}
+}
+
+func (simulator *Simulator) SolidBoundary(length float64) {
+	half_length := length / 2
+	for i := 0; i < simulator.N; i++ {
+		for {
+			is_collision := false
+			if simulator.Pos[i].X < -half_length {
+				collision_time := (simulator.Pos[i].X + half_length) / (simulator.Vel[i].X * simulator.Dt)
+				if (0. < collision_time) && (collision_time <= 1.) {
+					Y_collision := simulator.Pos[i].Y - simulator.Vel[i].Y*simulator.Dt*collision_time
+					Z_collision := simulator.Pos[i].Z - simulator.Vel[i].Z*simulator.Dt*collision_time
+					if math.Abs(Y_collision) < half_length && math.Abs(Z_collision) < half_length {
+						simulator.Vel[i].X = -simulator.Vel[i].X
+						simulator.Pos[i].X = -half_length + simulator.Vel[i].X*simulator.Dt*collision_time
+						is_collision = true
+					}
+				}
+			}
+			if half_length < simulator.Pos[i].X {
+				collision_time := (simulator.Pos[i].X - half_length) / (simulator.Vel[i].X * simulator.Dt)
+				if (0. < collision_time) && (collision_time <= 1.) {
+					Y_collision := simulator.Pos[i].Y - simulator.Vel[i].Y*simulator.Dt*collision_time
+					Z_collision := simulator.Pos[i].Z - simulator.Vel[i].Z*simulator.Dt*collision_time
+					if math.Abs(Y_collision) < half_length && math.Abs(Z_collision) < half_length {
+						simulator.Vel[i].X = -simulator.Vel[i].X
+						simulator.Pos[i].X = half_length + simulator.Vel[i].X*simulator.Dt*collision_time
+						is_collision = true
+					}
+				}
+			}
+			if simulator.Pos[i].Y < -half_length {
+				collision_time := (simulator.Pos[i].Y + half_length) / (simulator.Vel[i].Y * simulator.Dt)
+				if (0. < collision_time) && (collision_time <= 1.) {
+					X_collision := simulator.Pos[i].X - simulator.Vel[i].X*simulator.Dt*collision_time
+					Z_collision := simulator.Pos[i].Z - simulator.Vel[i].Z*simulator.Dt*collision_time
+					if math.Abs(X_collision) < half_length && math.Abs(Z_collision) < half_length {
+						simulator.Vel[i].Y = -simulator.Vel[i].Y
+						simulator.Pos[i].Y = -half_length + simulator.Vel[i].Y*simulator.Dt*collision_time
+						is_collision = true
+					}
+				}
+			}
+			if half_length < simulator.Pos[i].Y {
+				collision_time := (simulator.Pos[i].Y - half_length) / (simulator.Vel[i].Y * simulator.Dt)
+				if (0. < collision_time) && (collision_time <= 1.) {
+					X_collision := simulator.Pos[i].X - simulator.Vel[i].X*simulator.Dt*collision_time
+					Z_collision := simulator.Pos[i].Z - simulator.Vel[i].Z*simulator.Dt*collision_time
+					if math.Abs(X_collision) < half_length && math.Abs(Z_collision) < half_length {
+						simulator.Vel[i].Y = -simulator.Vel[i].Y
+						simulator.Pos[i].Y = half_length + simulator.Vel[i].Y*simulator.Dt*collision_time
+						is_collision = true
+					}
+				}
+			}
+			if simulator.Pos[i].Z < -half_length {
+				collision_time := (simulator.Pos[i].Z + half_length) / (simulator.Vel[i].Z * simulator.Dt)
+				if (0. < collision_time) && (collision_time <= 1.) {
+					X_collision := simulator.Pos[i].X - simulator.Vel[i].X*simulator.Dt*collision_time
+					Y_collision := simulator.Pos[i].Y - simulator.Vel[i].Y*simulator.Dt*collision_time
+					if math.Abs(X_collision) < half_length && math.Abs(Y_collision) < half_length {
+						simulator.Vel[i].Z = -simulator.Vel[i].Z
+						simulator.Pos[i].Z = -half_length + simulator.Vel[i].Z*simulator.Dt*collision_time
+						is_collision = true
+					}
+				}
+			}
+			if half_length < simulator.Pos[i].Z {
+				collision_time := (simulator.Pos[i].Z - half_length) / (simulator.Vel[i].Z * simulator.Dt)
+				if (0. < collision_time) && (collision_time <= 1.) {
+					X_collision := simulator.Pos[i].X - simulator.Vel[i].X*simulator.Dt*collision_time
+					Y_collision := simulator.Pos[i].Y - simulator.Vel[i].Y*simulator.Dt*collision_time
+					if math.Abs(X_collision) < half_length && math.Abs(Y_collision) < half_length {
+						simulator.Vel[i].Z = -simulator.Vel[i].Z
+						simulator.Pos[i].Z = half_length + simulator.Vel[i].Z*simulator.Dt*collision_time
+						is_collision = true
+					}
+				}
+			}
+			if is_collision == false {
+				break
+			}
+		}
+	}
+}
+
+func (simulator *Simulator) PeriodicBoundary(length float64) {
+	half_length := length / 2
+	for i := 0; i < simulator.N; i++ {
+		if simulator.Pos[i].X > half_length {
+			simulator.Pos[i].X = simulator.Pos[i].X - length
+		}
+		if simulator.Pos[i].X < -half_length {
+			simulator.Pos[i].X = simulator.Pos[i].X + length
+		}
+		if simulator.Pos[i].Y > half_length {
+			simulator.Pos[i].Y = simulator.Pos[i].Y - length
+		}
+		if simulator.Pos[i].Y < -half_length {
+			simulator.Pos[i].Y = simulator.Pos[i].Y + length
+		}
+		if simulator.Pos[i].Z > half_length {
+			simulator.Pos[i].Z = simulator.Pos[i].Z - length
+		}
+		if simulator.Pos[i].Z < -half_length {
+			simulator.Pos[i].Z = simulator.Pos[i].Z + length
+		}
+	}
+}
+
+func (simulator *Simulator) MakeGrid() {
+	n := int(simulator.RegionSize/simulator.GridSize + 1)
+	grid := make([][]int, n*n*n)
+	for i := 0; i < simulator.N; i++ {
+		x := int((simulator.Pos[i].X + simulator.RegionSize/2) / simulator.GridSize)
+		y := int((simulator.Pos[i].Y + simulator.RegionSize/2) / simulator.GridSize)
+		z := int((simulator.Pos[i].Z + simulator.RegionSize/2) / simulator.GridSize)
+		grid[x+y*n+z*n*n] = append(grid[x+y*n+z*n*n], i)
+	}
+	simulator.Grid = grid
+}
+
+func (simulator *Simulator) GetNearAtoms(atom_index int, is_periodic ...bool) []int {
+
+	if len(is_periodic) == 0 {
+		is_periodic = []bool{false}
+	}
+
+	n := int(simulator.RegionSize/simulator.GridSize + 1)
+	x := int((simulator.Pos[atom_index].X + simulator.RegionSize/2) / simulator.GridSize)
+	y := int((simulator.Pos[atom_index].Y + simulator.RegionSize/2) / simulator.GridSize)
+	z := int((simulator.Pos[atom_index].Z + simulator.RegionSize/2) / simulator.GridSize)
+	indices := []int{}
+
+	if is_periodic[0] == false {
+		for i := x - 1; i <= x+1; i++ {
+			for j := y - 1; j <= y+1; j++ {
+				for k := z - 1; k <= z+1; k++ {
+					if 0 <= i && i < n && 0 <= j && j < n && 0 <= k && k < n {
+						indices = append(indices, simulator.Grid[i+j*n+k*n*n]...)
+					}
+				}
+			}
+		}
+	} else {
+		for i := x - 1; i <= x+1; i++ {
+			for j := y - 1; j <= y+1; j++ {
+				for k := z - 1; k <= z+1; k++ {
+					i = i % n
+					j = j % n
+					k = k % n
+					indices = append(indices, simulator.Grid[i+j*n+k*n*n]...)
+				}
+			}
+		}
+	}
+
+	return indices
 }
 
 func (simulator *Simulator) Save(directory string) {
@@ -126,23 +291,7 @@ func (simulator *Simulator) Load(filename string) {
 	simulator.N = N
 	simulator.Gravity = gravity
 
-	simulator.Id = id	
+	simulator.Id = id
 	simulator.Pos = pos
 	simulator.Vel = vel
-}
-
-func main() {
-	// Create a new simulator
-	id := []int{0, 1}
-	pos := []Vector{Vector{0.0, 0.0, 0.0}, Vector{0.0, 0.0, 1.0}}
-	vel := []Vector{Vector{0.0, 0.0, 0.0}, Vector{0.0, 0.0, 0.0}}
-	simulator := NewSimulator(0.01, id, pos, vel, Vector{0.0, 0.0, -9.8})
-	//simulator.Load("output/snapshot_00000991.hdf5")
-
-	for i := 0; i < 1000; i++ {
-		if i%10 == 0 {
-			simulator.Save("output")
-		}
-		simulator.Step()
-	}
 }

@@ -1,4 +1,7 @@
 *.py
 *.exe
-output
 test
+temp
+images
+snapshots
+videos
