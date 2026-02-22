@@ -2,6 +2,7 @@ package atom3D
 
 import (
 	"fmt"
+	"log"
 
 	"gonum.org/v1/hdf5"
 )
@@ -86,12 +87,44 @@ func ReadDatasetInt(group *hdf5.Group, name string) []int {
 }
 
 func ReadDatasetVector(group *hdf5.Group, name string) []Vector {
-	dataset, _ := group.OpenDataset(name)
+	dataset, err := group.OpenDataset(name)
+	if err != nil {
+		log.Printf("Error opening dataset '%s': %v", name, err)
+		return nil
+	}
 	defer dataset.Close()
 	dataspace := dataset.Space()
 	dims, _, _ := dataspace.SimpleExtentDims()
-	fmt.Println(dims)
-	data := make([]Vector, dims[0])
-	dataset.Read(&data)
+	fmt.Println("Dataset dimensions:", dims)
+
+	// HDF5에서 읽은 데이터는 flat array 형태일 수 있음
+	totalElements := int(dims[0])
+	if len(dims) > 1 {
+		totalElements = int(dims[0])
+		vectorSize := int(dims[1])
+		if vectorSize != 3 {
+			log.Printf("Expected 3D vectors, got %d dimensions", vectorSize)
+			return nil
+		}
+	}
+
+	// 먼저 float64 배열로 읽기
+	flatData := make([]float64, totalElements*3)
+	err = dataset.Read(&flatData)
+	if err != nil {
+		log.Printf("Error reading dataset: %v", err)
+		return nil
+	}
+
+	// Vector 배열로 변환
+	data := make([]Vector, totalElements)
+	for i := 0; i < totalElements; i++ {
+		data[i] = Vector{
+			X: flatData[i*3],
+			Y: flatData[i*3+1],
+			Z: flatData[i*3+2],
+		}
+	}
+
 	return data
 }

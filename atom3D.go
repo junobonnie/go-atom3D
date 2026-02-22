@@ -177,6 +177,23 @@ func (simulator *Simulator) MakeGrid() {
 	simulator.Grid = grid
 }
 
+func Mod(a, b int) int {
+	result := a % b
+	if result < 0 {
+		result += b
+	}
+	return result
+}
+
+func removeValue(slice []int, value int) []int {
+	for i, v := range slice {
+		if v == value {
+			return append(slice[:i], slice[i+1:]...)
+		}
+	}
+	return slice
+}
+
 func (simulator *Simulator) GetNearAtoms(atom_index int, is_periodic ...bool) []int {
 
 	if len(is_periodic) == 0 {
@@ -200,19 +217,74 @@ func (simulator *Simulator) GetNearAtoms(atom_index int, is_periodic ...bool) []
 			}
 		}
 	} else {
-		for i := x - 1; i <= x+1; i++ {
-			for j := y - 1; j <= y+1; j++ {
-				for k := z - 1; k <= z+1; k++ {
-					i = i % n
-					j = j % n
-					k = k % n
-					indices = append(indices, simulator.Grid[i+j*n+k*n*n]...)
+		x_min := 1
+		if x == 0 {
+			x_min = 2
+		}
+		y_min := 1
+		if y == 0 {
+			y_min = 2
+		}
+		z_min := 1
+		if z == 0 {
+			z_min = 2
+		}
+		x_max := 1
+		if x == n-2 {
+			x_max = 2
+		}
+		y_max := 1
+		if y == n-2 {
+			y_max = 2
+		}
+		z_max := 1
+		if z == n-2 {
+			z_max = 2
+		}
+		for i := x - x_min; i <= x+x_max; i++ {
+			for j := y - y_min; j <= y+y_max; j++ {
+				for k := z - z_min; k <= z+z_max; k++ {
+					i_ := Mod(i, n)
+					j_ := Mod(j, n)
+					k_ := Mod(k, n)
+					// if atom_index == 0 {
+					// 	fmt.Println(n)
+					// 	fmt.Println("i, j, k:", i_, j_, k_)
+
+					// }
+
+					indices = append(indices, simulator.Grid[i_+j_*n+k_*n*n]...)
 				}
 			}
 		}
 	}
 
-	return indices
+	return removeValue(indices, atom_index)
+}
+
+func (simulator *Simulator) PeriodicDisplacement(atom_index int, another_atom_index int) Vector {
+	half_region := simulator.RegionSize / 2
+	dx := simulator.Pos[another_atom_index].X - simulator.Pos[atom_index].X
+	dy := simulator.Pos[another_atom_index].Y - simulator.Pos[atom_index].Y
+	dz := simulator.Pos[another_atom_index].Z - simulator.Pos[atom_index].Z
+
+	if dx > half_region {
+		dx -= simulator.RegionSize
+	} else if dx < -half_region {
+		dx += simulator.RegionSize
+	}
+	if dy > half_region {
+		dy -= simulator.RegionSize
+	} else if dy < -half_region {
+		dy += simulator.RegionSize
+	}
+	if dz > half_region {
+		dz -= simulator.RegionSize
+	} else if dz < -half_region {
+		dz += simulator.RegionSize
+	}
+
+	return Vector{X: dx, Y: dy, Z: dz}
 }
 
 func (simulator *Simulator) Save(directory string) {

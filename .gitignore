@@ -1,7 +1,8 @@
 *.py
 *.exe
-test
+*test
 temp
-images
-snapshots
+images*
+snapshots*
 videos
+.vscode
